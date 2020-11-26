@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<lwm2m>
+    <person>
+        <name>John</name>
+    </person>
+    <person>
+        <name>Moaty</name>
+    </person>
+</lwm2m>

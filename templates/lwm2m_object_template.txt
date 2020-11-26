@@ -1,0 +1,27 @@
+
+/**
+* AUTOMATICALLY GENERATED CODE
+* python LwM2M Objects Generator tool.
+*/
+
+#ifndef {{ HEADER_GUARD }}
+#define {{ HEADER_GUARD }}
+
+#include "objects.h"        //class definitions and macros to help construct lwm2m objects in C++
+
+namespace nx {
+    namespace {{ OBJ_ID }} {
+        #define {{ OBJ_ID_UPPER }}_RES_COUNT    {{ RES_COUNT }}         //number of resource this object has
+
+        class instance : public lwm2m_instance_base {
+        public:
+            instance() = default;
+            ~instance() = default;
+
+        public:
+
+        };
+    }
+}
+
+#endif

@@ -1,0 +1,11 @@
+{# A C source file, that registers a lwm2m object in zephyr's internal lwm2m engine #}
+{# the generated file is purely internal #}
+
+/**
+* AUTOMATICALLY GENERATED CODE
+* python LwM2M Objects Generator tool: {{ GEN_DATE }}
+*/
+
+#include <init.h>
+
+SYS_INIT(register_illuminance_obj, APPLICATION, CONFIG_KERNEL_INIT_PRIORITY_DEFAULT);

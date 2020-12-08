@@ -1,17 +1,25 @@
-
+{# A C++ Application-level header file #}
 /**
 * AUTOMATICALLY GENERATED CODE
-* python LwM2M Objects Generator tool: {{ GEN_DATE }}
+* python LwM2M Objects Generator tool: https://github.com/MoatyX/lwm2m-objects-generator
+* Gen Date: {{ GEN_DATE }}
 */
 
-#ifndef {{ HEADER_GUARD }}
-#define {{ HEADER_GUARD }}
+#ifndef {{ LWM2M_OBJ.HEADER_GUARD }}
+#define {{ LWM2M_OBJ.HEADER_GUARD }}
 
 #include "objects.h"        //class definitions and macros to help construct lwm2m objects in C++
 
 namespace nx {
-    namespace ID{{ OBJ_ID }} {
-        #define ID{{ OBJ_ID }}_RES_COUNT    {{ RES_COUNT }}         //number of resource this object has
+    namespace id{{ LWM2M_OBJ.OBJ_ID }} {
+        #define ID{{ LWM2M_OBJ.OBJ_ID }}_RES_COUNT    {{ LWM2M_OBJ.RES_COUNT }}         //number of resource this object has
+
+        /**
+         * @brief return the number of resources Object {{ LWM2M_OBJ.OBJ_ID }} has
+         */
+        static constexpr uint32_t RES_COUNT() {
+            return ID{{ LWM2M_OBJ.OBJ_ID }}_RES_COUNT;
+        }
 
         class instance : public lwm2m_instance_base {
         public:
@@ -19,19 +27,18 @@ namespace nx {
             ~instance() = default;
 
         public:
-            {% for item in RESOURCES %}
-                {{ item.RES_DATA_TYPE }} {{ item.RES_NAME }};
+            {% for item in LWM2M_OBJ.RESOURCES %} {{ item.RES_DATA_TYPE }} {{ item.RES_NAME }};
             {% endfor %}
         };
 
         class object : public lwm2m_object_base {
         public:
-            object() : lwm2m_object_base({{ OBJ_ID }}) {};
+            object() : lwm2m_object_base({{ LWM2M_OBJ.OBJ_ID }}) {};
             ~object() = default;
 
             //Lwm2mResource definitions
-            {% for item in RESOURCES %}
-            RESOURCE({{ item.RES_ID }}, {{ item.RES_INST_TYPE }}, {{ item.RES_OP }}, (member_pointer)(&instance::{{ item.RES_NAME }}),
+            {% for item in LWM2M_OBJ.RESOURCES %}
+            RESOURCE({{ item.RES_ID }}, resource_type::{{ item.RES_INST_TYPE }}, resource_operations::{{ item.RES_OP }}, (member_pointer)(&instance::{{ item.RES_NAME }}),
                     MEMBER_SIZE(instance::{{ item.RES_NAME }}), {{ item.RES_NAME }});
             {% endfor %}
 
@@ -43,18 +50,18 @@ namespace nx {
             * @return array of pointers to the resources an object has
             */
             lwm2m_object_resource **get_all_res(size_t *res_count) override {
-                *res_count = ID{{ OBJ_ID }}_RES_COUNT;
+                if(res_count != nullptr) *res_count = RES_COUNT();
                 return all_res;
             }
 
         private:
             //define all resources
-            lwm2m_object_resource* all_res[ID{{ OBJ_ID }}_RES_COUNT] {
-                {% for item in RESOURCES %}&{{ item.RES_NAME }}{% if loop.index < (loop.length) %},{% endif %}
+            lwm2m_object_resource* all_res[RES_COUNT()] {
+                {% for item in LWM2M_OBJ.RESOURCES %}&{{ item.RES_NAME }}{% if loop.index < (loop.length) %},{% endif %}
                 {% endfor %}
-            }
+            };
         };
     }
 }
 
-#endif  //{{ HEADER_GUARD }}
+#endif  //{{ LWM2M_OBJ.HEADER_GUARD }}

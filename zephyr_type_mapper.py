@@ -1,20 +1,25 @@
-# functions that helps mapping standard-defined LwM2M Resource types, to a equivalent Programming language Data type
+"""functions that helps mapping standard-defined LwM2M Resource types, to a equivalent Programming language Data type"""
 
 res_types = {
-    5500: "bool",
-    5501: "uint64_t",
-    5750: "char*"
+    5500: ("bool", "BOOL"),
+    5501: ("uint64_t", "U64"),
+    5750: ("char*", "STRING")
 }
 
 
-def map_data_type(res_id) -> str:
+def map_to_cpp_data_type(res_id) -> str:
     """
-    map a lwm2m resource to a primitive C++ data type using its Resource ID
+    map a lwm2m resource to a primitive data type using its Resource ID.
 
     :param res_id: the ID of a reusable resource
     """
     output = res_types[int(res_id)]
-    return output
+    return output[0]
+
+
+def map_to_zephyr_type_def(res_id) -> str:
+    output = res_types[int(res_id)]
+    return output[1]
 
 
 def map_resource_instance_type(data_type, default_instance_definition) -> str:

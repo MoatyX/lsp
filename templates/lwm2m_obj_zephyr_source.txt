@@ -1,11 +1,129 @@
 {# A C source file, that registers a lwm2m object in zephyr's internal lwm2m engine #}
 {# the generated file is purely internal #}
 
+{% macro OBJ_NAME() -%}
+{{ LWM2M_OBJ.OBJ_NAME }}
+{%- endmacro %}
+
+{% macro INIT_FN_NAME() -%}
+register_{{ OBJ_NAME() }}_object
+{%- endmacro %}
+
+{% macro OBJ_ID_DEF(NAME, ID=None) -%}
+{%- set OUTPUT= OBJ_NAME() + "_" + NAME + "_ID" -%}
+{{ OUTPUT.upper() }}{% if ID != None %}     {{ ID }}{% endif %}
+{%- endmacro %}
+
+{% macro FIELD_BUILDER(OBJ_ID_DEF, OP, ZEPHYR_DATA_TYPE, MANDATORY) -%}
+    {% set FINAL_FIELD="" -%}
+
+    {# build either an EXECUTE or a DATA Object field #}
+    {%- if OP == "EXEC" -%}
+        {% set FINAL_FIELD = FINAL_FIELD + "OBJ_FIELD_EXECUTE" -%}
+        {% if MANDATORY == True -%}
+            {% set FINAL_FIELD = FINAL_FIELD + "_OPT" -%}
+        {% endif -%}
+    {% else -%}
+        {% set FINAL_FIELD = FINAL_FIELD + "OBJ_FIELD_DATA" -%}
+    {% endif -%}
+
+    {# build the correct Operation type #}
+    {% set FINAL_OP="" -%}
+    {% if OP != "EXEC" -%}
+        {% set FINAL_OP = FINAL_OP + OP -%}
+        {% if MANDATORY == False -%}
+            {% set FINAL_OP = FINAL_OP + "_OPT" -%}
+        {% endif -%}
+    {% endif -%}
+    {{ FINAL_FIELD }}({{ OBJ_ID_DEF }}, {{ FINAL_OP }}, {{ ZEPHYR_DATA_TYPE }})
+{%- endmacro %}
+
+{% macro OBJ_DEF() -%}
+{{ LWM2M_OBJ.OBJ_NAME.upper() }}_OBJECT_ID
+{%- endmacro %}
+
 /**
 * AUTOMATICALLY GENERATED CODE
-* python LwM2M Objects Generator tool: {{ GEN_DATE }}
+* python LwM2M Objects Generator tool: https://github.com/MoatyX/lwm2m-objects-generator
+* Gen Date: {{ GEN_DATE }}
 */
 
 #include <init.h>
+#include <device.h>
 
-SYS_INIT(register_illuminance_obj, APPLICATION, CONFIG_KERNEL_INIT_PRIORITY_DEFAULT);
+#include <net/lwm2m.h>
+#include "lwm2m_object.h"
+#include "lwm2m_engine.h"
+
+#define LOG_MODULE_NAME lwm2m_{{ OBJ_NAME() }}
+#define LOG_LEVEL CONFIG_LWM2M_LOG_LEVEL
+#include <logging/log.h>
+LOG_MODULE_REGISTER(LOG_MODULE_NAME, LOG_LEVEL);
+
+/*Object Definitions*/
+#define {{ OBJ_DEF() }}         {{ LWM2M_OBJ.OBJ_ID }}
+#define OBJ_RESOURCES_COUNT     {{ LWM2M_OBJ.RES_COUNT }}
+{% for item in LWM2M_OBJ.RESOURCES -%}
+#define {{ OBJ_ID_DEF(item.RES_NAME, item.RES_ID) }}
+{% endfor -%}
+//---------------------------
+
+/*other defines*/
+#define MAX_INSTANCE_COUNT				3			//TODO: make this configurable with Kconfig
+//---------------------------
+
+//object management
+static struct lwm2m_engine_obj lwm2m_obj;
+static struct lwm2m_engine_obj_field fields[] = {
+    {%- for item in LWM2M_OBJ.RESOURCES -%}
+    {{ FIELD_BUILDER(OBJ_ID_DEF(item.RES_NAME), item.RES_OP, item.ZEPHYR_RES_DATA_TYPE, item.MANDATORY) }}{% if loop.i < (loop.length) %},{% endif %}
+    {%- endfor %}
+};
+//---------------------------
+
+//instance management
+static struct lwm2m_engine_obj_inst instances[MAX_INSTANCE_COUNT];
+//---------------------------
+
+/**
+* called once each time a new object instance is requested to be created.
+* @brief this function creates and initializes a new instance.
+*/
+static struct lwm2m_engine_obj_inst* object_create_callback(uint16_t obj_inst_id) {
+	int avail = -1, i = 0, j = 0;
+
+	/* Check that there is no other instance with this ID */
+	for (int i = 0; i < OBJ_RESOURCES_COUNT; i++) {
+		if (instances[i].obj && instances[i].obj_inst_id == obj_inst_id) {
+			LOG_ERR("Can not create instance - " "already existing: %u", obj_inst_id);
+			return NULL;
+		}
+
+		/* Save first available slot i */
+		if (avail < 0 && !instances[i].obj) {
+			avail = i;
+		}
+	}
+
+	if (avail < 0) {
+		LOG_ERR("Can not create instance - no more room: %u", obj_inst_id);
+		return NULL;
+	}
+
+	....continue....
+}
+
+
+//called once by the Kernel
+static int {{ INIT_FN_NAME() }}(const struct device *dev) {
+    lwm2m_obj.obj_id = {{ OBJ_DEF() }};
+    lwm2m_obj.fields = fields;
+    lwm2m_obj.field_count = OBJ_RESOURCES_COUNT;            //TODO: make dynamic for supporting the TIME_STAMP resource as an extension for example?
+    lwm2m_obj.max_instance_count = MAX_INSTANCE_COUNT;
+    lwm2m_obj.create_cb = object_create_callback;
+
+    lwm2m_register_obj(&lwm2m_obj);
+    return 0;
+}
+
+SYS_INIT({{ INIT_FN_NAME() }}, APPLICATION, CONFIG_KERNEL_INIT_PRIORITY_DEFAULT);

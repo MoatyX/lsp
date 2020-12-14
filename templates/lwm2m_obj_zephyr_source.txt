@@ -63,26 +63,29 @@ LOG_MODULE_REGISTER(LOG_MODULE_NAME, LOG_LEVEL);
 /*Object Definitions*/
 #define {{ OBJ_DEF() }}         {{ LWM2M_OBJ.OBJ_ID }}
 #define OBJ_RESOURCES_COUNT     {{ LWM2M_OBJ.RES_COUNT }}
+
 {% for item in LWM2M_OBJ.RESOURCES -%}
 #define {{ OBJ_ID_DEF(item.RES_NAME, item.RES_ID) }}
 {% endfor -%}
 //---------------------------
 
 /*other defines*/
-#define MAX_INSTANCE_COUNT				3			//TODO: make this configurable with Kconfig
+#define MAX_INSTANCE_COUNT				{% if LWM2M_OBJ.MULTI_INSTANCE %}3 {% else %}1{% endif %}			//TODO: make this configurable with Kconfig
 //---------------------------
 
 //object management
 static struct lwm2m_engine_obj lwm2m_obj;
 static struct lwm2m_engine_obj_field fields[] = {
     {%- for item in LWM2M_OBJ.RESOURCES -%}
-    {{ FIELD_BUILDER(OBJ_ID_DEF(item.RES_NAME), item.RES_OP, item.ZEPHYR_RES_DATA_TYPE, item.MANDATORY) }}{% if loop.i < (loop.length) %},{% endif %}
+    {{ FIELD_BUILDER(OBJ_ID_DEF(item.RES_NAME), item.RES_OP, item.ZEPHYR_RES_DATA_TYPE, item.MANDATORY) }}{% if loop.index0 < (loop.length) %},{% endif %}
     {%- endfor %}
 };
 //---------------------------
 
 //instance management
 static struct lwm2m_engine_obj_inst instances[MAX_INSTANCE_COUNT];
+static struct lwm2m_engine_res res[MAX_INSTANCE_COUNT][OBJ_RESOURCES_COUNT];
+static struct lwm2m_engine_res_inst res_inst[MAX_INSTANCE_COUNT][OBJ_RESOURCES_COUNT];
 //---------------------------
 
 /**
@@ -110,7 +113,24 @@ static struct lwm2m_engine_obj_inst* object_create_callback(uint16_t obj_inst_id
 		return NULL;
 	}
 
-	....continue....
+    /* instances and resources initialization */
+	memset(res[avail], 0, sizeof(res[avail][0]) * OBJ_RESOURCES_COUNT); //set every instance resource pointer to NULL
+    init_res_instance(res_inst[avail], OBJ_RESOURCES_COUNT);            //set pointers to NULL and flag to RES_INSTANCE_NOT_CREATED
+
+    //after setting everything to NULL, now assign the IDs and bind res with res_inst for every res
+    {%- for item in LWM2M_OBJ.RESOURCES -%}
+    {%- if item.RES_OP != "EXEC" %}
+    INIT_OBJ_RES_OPTDATA({{ OBJ_ID_DEF(item.RES_NAME) }}, res, i, res_inst, j);
+    {%- else %}
+    INIT_OBJ_RES_EXECUTE({{ OBJ_ID_DEF(item.RES_NAME) }}, res, i, NULL);
+    {%- endif %}
+    {%- endfor %}
+
+    instances[avail].resources = res[avail];
+    instances[avail].resource_count = i;
+
+    LOG_DBG("Create {{ LWM2M_OBJ.OBJ_NAME }} instance: %d", obj_inst_id);
+    return &instances[avail];
 }
 
 

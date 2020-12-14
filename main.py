@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-import zephyr_type_mapper as zephyr_mapper
+import zephyr_mapping_utilities as zephyr_mapper
 from datetime import date
 from jinja2 import Environment, FileSystemLoader
 from lwm2m_object import Lwm2mObject
@@ -24,6 +24,8 @@ def generate_lwm2m_object(templates_dir, template_name, xml_path, output_dir_pat
 
     obj_name = str(root.find("Name").text).replace(' ', '_')
     OBJ_ID = root.find("ObjectID").text
+    obj_inst = root.find("MultipleInstances").text
+    is_multi = zephyr_mapper.obj_instance_is_multiple(obj_inst)
     HEADER_GUARD = "NX_GENERATED_" + obj_name.upper() + "_ID_" + OBJ_ID + "_H_"
 
     resources_raw = root.find("Resources")
@@ -48,7 +50,7 @@ def generate_lwm2m_object(templates_dir, template_name, xml_path, output_dir_pat
     template_env = Environment(loader=template_loader)
     template = template_env.get_template(template_name)
 
-    LWM2M_OBJ = Lwm2mObject(obj_name, OBJ_ID, HEADER_GUARD, RESOURCES)
+    LWM2M_OBJ = Lwm2mObject(obj_name, OBJ_ID, HEADER_GUARD, RESOURCES, is_multi)
     output = template.render(GEN_DATE=GEN_DATE, LWM2M_OBJ=LWM2M_OBJ)
 
     # check if we should output to file, or to console
@@ -77,7 +79,24 @@ def generate_zephyr_source_obj(templates_dir, template_name, lwm2m_obj: Lwm2mObj
     template_env = Environment(loader=template_loader)
     template = template_env.get_template(template_name)
     output = template.render(GEN_DATE=GEN_DATE, LWM2M_OBJ=lwm2m_obj)
-    print(output)
+
+    # check if we should output to file, or to console
+    if output_dir_path is None:
+        print(output)
+    else:
+        # make sure the directory exits
+        path = Path(output_dir_path).absolute()
+        if not Path.exists(path):
+            path.mkdir(parents=True, exist_ok=True)
+            pass
+
+        c_file_path = path/f"{lwm2m_obj.OBJ_NAME}_id{lwm2m_obj.OBJ_ID}.c"
+        zephyr_c_source = open(c_file_path, "w")
+        zephyr_c_source.writelines(output)
+        zephyr_c_source.close()
+        pass
+
+    print(f"generated Zephyr Source Definition {lwm2m_obj.OBJ_NAME}")
     return
 
 

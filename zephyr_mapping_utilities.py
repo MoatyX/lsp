@@ -39,3 +39,16 @@ def map_resource_instance_type(data_type, default_instance_definition) -> str:
         return "PTR"
 
     return default_instance_definition
+
+
+def obj_instance_is_multiple(obj_multiple_instances: str) -> bool:
+    """
+    maps the XML value of an Object's "MultipleInstances" to a boolean, that represents if the object can be instanced.
+    this is useful to optimize memory usage of the generated code
+    :param obj_multiple_instances:
+    :return:
+    """
+    if obj_multiple_instances == "Multiple":
+        return True
+    else:
+        return False

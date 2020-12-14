@@ -1,5 +1,12 @@
+import xml.etree.ElementTree as ET
+import zephyr_mapping_utilities as zephyr_mapper
+
+
 class Lwm2mResource:
+
+    # essential resource data
     RES_DATA_TYPE: str
+    RES_DATA_TYPE_RAW: str
     RES_NAME: str
     RES_ID: str
     RES_INST_TYPE: str
@@ -7,19 +14,25 @@ class Lwm2mResource:
     DESCRIPTION: str
     MANDATORY: bool
 
-    # special field, because zephyr uses macros to represent data types internally
+    # Metadata, helps produce good code
+    RES_TYPE: str
     ZEPHYR_RES_DATA_TYPE: str
 
-    def __init__(self, res_id, res_name, res_op, res_inst_type, res_data_type, description, mandatory=False):
-        self.RES_DATA_TYPE = res_data_type
-        self.RES_NAME = res_name
-        self.RES_ID = res_id
-        self.RES_INST_TYPE = res_inst_type
-        self.RES_OP = res_op
-        self.DESCRIPTION = description
-        self.MANDATORY = mandatory
+    xml_res: ET.Element
+
+    def __init__(self, xml_res: ET.Element):
+        self.xml_res = xml_res
         pass
 
-    def set_zephyr_res_data_type(self, val: str):
-        self.ZEPHYR_RES_DATA_TYPE = val
+    def parse(self):
+        self.RES_ID = self.xml_res.attrib["ID"]
+        self.RES_NAME = self.xml_res.find("Name").text.replace(' ', '_').lower()
+        self.RES_DATA_TYPE_RAW = self.xml_res.find("Type").text
+        self.RES_OP = self.xml_res.find("Operations").text.replace(' ', '_')
+        self.RES_DATA_TYPE = zephyr_mapper.map_to_cpp_data_type(self.RES_DATA_TYPE_RAW, self.RES_OP)
+        self.ZEPHYR_RES_DATA_TYPE = zephyr_mapper.map_to_zephyr_type_def(self.RES_DATA_TYPE_RAW)
+        res_inst_type_raw = self.xml_res.find("MultipleInstances").text.replace(' ', '_')
+        self.RES_INST_TYPE = zephyr_mapper.map_resource_instance_type(self.RES_DATA_TYPE, res_inst_type_raw)
+        self.DESCRIPTION = self.xml_res.find("Description").text
+        self.MANDATORY = False if self.xml_res.find("Mandatory").text == "Optional" else True
         pass

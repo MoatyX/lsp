@@ -70,7 +70,7 @@ LOG_MODULE_REGISTER(LOG_MODULE_NAME, LOG_LEVEL);
 //---------------------------
 
 /*other defines*/
-#define MAX_INSTANCE_COUNT				{% if LWM2M_OBJ.MULTI_INSTANCE %}3 {% else %}1{% endif %}			//TODO: make this configurable with Kconfig
+#define MAX_INSTANCE_COUNT				{% if LWM2M_OBJ.MULTI_INSTANCE %}3{% else %}1{% endif %}			//TODO: make this configurable with Kconfig
 //---------------------------
 
 //object management

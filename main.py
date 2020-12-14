@@ -14,43 +14,16 @@ LWM2M_OBJECTS_OUTPUT_PATH = "./generated/"
 GEN_DATE = date.today().strftime("%m/%Y")
 
 
-def generate_lwm2m_object(templates_dir, template_name, xml_path, output_dir_path=None) -> Lwm2mObject:
-    # TODO: first do XML Schema Validation
-    tree = ET.parse(xml_path)
-    if tree is None:
-        print(f"failed to parse {xml_path}")
-        return None
-    root = tree.getroot()[0]  # LWM2M(actual root) -> OBJECT(use this as the "root")
-
-    obj_name = str(root.find("Name").text).replace(' ', '_')
-    OBJ_ID = root.find("ObjectID").text
-    obj_inst = root.find("MultipleInstances").text
-    is_multi = zephyr_mapper.obj_instance_is_multiple(obj_inst)
-    HEADER_GUARD = "NX_GENERATED_" + obj_name.upper() + "_ID_" + OBJ_ID + "_H_"
-
-    resources_raw = root.find("Resources")
-    RESOURCES = []
-    for res in list(resources_raw):
-        res_id = res.attrib["ID"]
-        res_name = res.find("Name").text.replace(' ', '_').lower()
-        res_op = res.find("Operations").text.replace(' ', '_')
-        res_cpp_data_type = zephyr_mapper.map_to_cpp_data_type(res_id)
-        res_zephyr_data_type = zephyr_mapper.map_to_zephyr_type_def(res_id)
-        res_inst_type_raw = res.find("MultipleInstances").text.replace(' ', '_')
-        res_inst_type = zephyr_mapper.map_resource_instance_type(res_cpp_data_type, res_inst_type_raw)
-        description = res.find("Description").text
-        mandatory = False if res.find("Mandatory").text == "Optional" else True
-
-        res_item = Lwm2mResource(res_id, res_name, res_op, res_inst_type, res_cpp_data_type, description, mandatory)
-        res_item.set_zephyr_res_data_type(res_zephyr_data_type)
-        RESOURCES.append(res_item)
+def generate_lwm2m_object(templates_dir: str, template_name: str, xml_path: str, output_dir_path=None) -> Lwm2mObject:
+    # TODO: first do xml Schema Validation
+    LWM2M_OBJ = Lwm2mObject(xml_path)
+    LWM2M_OBJ.parse()
 
     # import the template
     template_loader = FileSystemLoader(templates_dir)
     template_env = Environment(loader=template_loader)
     template = template_env.get_template(template_name)
 
-    LWM2M_OBJ = Lwm2mObject(obj_name, OBJ_ID, HEADER_GUARD, RESOURCES, is_multi)
     output = template.render(GEN_DATE=GEN_DATE, LWM2M_OBJ=LWM2M_OBJ)
 
     # check if we should output to file, or to console
@@ -63,7 +36,7 @@ def generate_lwm2m_object(templates_dir, template_name, xml_path, output_dir_pat
             path.mkdir(parents=True, exist_ok=True)
             pass
 
-        cpp_header_file_path = path/f"{obj_name}_id{OBJ_ID}.h"
+        cpp_header_file_path = path / f"{Lwm2mObject.OBJ_NAME}_id{Lwm2mObject.OBJ_ID}.h"
         cpp_header = open(cpp_header_file_path, "w")
         cpp_header.writelines(output)
         cpp_header.close()
@@ -90,7 +63,7 @@ def generate_zephyr_source_obj(templates_dir, template_name, lwm2m_obj: Lwm2mObj
             path.mkdir(parents=True, exist_ok=True)
             pass
 
-        c_file_path = path/f"{lwm2m_obj.OBJ_NAME}_id{lwm2m_obj.OBJ_ID}.c"
+        c_file_path = path / f"{lwm2m_obj.OBJ_NAME}_id{lwm2m_obj.OBJ_ID}.c"
         zephyr_c_source = open(c_file_path, "w")
         zephyr_c_source.writelines(output)
         zephyr_c_source.close()
@@ -98,6 +71,11 @@ def generate_zephyr_source_obj(templates_dir, template_name, lwm2m_obj: Lwm2mObj
 
     print(f"generated Zephyr Source Definition {lwm2m_obj.OBJ_NAME}")
     return
+
+
+def generate_zephyr_lwm2m_kconfig():
+    # TODO.....
+    pass
 
 
 if __name__ == '__main__':

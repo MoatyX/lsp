@@ -84,8 +84,13 @@ def generate_zephyr_lwm2m_kconfig(templates_dir, template_name, lwm2m_obj: Lwm2m
 
 if __name__ == '__main__':
     generated_lwm2m_objects = []
+
+    # TODO: some for loop here to loop over all XML files....
     lwm2m_object = generate_lwm2m_object(TEMPLATES_DIR, "lwm2m_object_template.txt", "./xml/3347.xml")
     generated_lwm2m_objects.append(lwm2m_object)
     generate_zephyr_source_obj(TEMPLATES_DIR, "lwm2m_obj_zephyr_source.txt", lwm2m_object)
+    # end of the for loop
+
+    # generate a Kconfig file to configure the usage of the generated code inside Zephyr Applications
     generate_zephyr_lwm2m_kconfig(TEMPLATES_DIR, "zephyr_kconfig.txt", generated_lwm2m_objects)
     pass

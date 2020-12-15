@@ -9,6 +9,7 @@ class Lwm2mObject:
     OBJ_ID: str
     OBJ_NAME: str
     OBJ_INST: str
+    OBJ_DESC: str
     HEADER_GUARD: str
 
     RES_COUNT = 0
@@ -27,6 +28,7 @@ class Lwm2mObject:
         root = tree.getroot()[0]  # LWM2M(actual root) -> OBJECT(use this as the "root")
         self.OBJ_ID = root.find("ObjectID").text
         self.OBJ_NAME = str(root.find("Name").text).replace(' ', '_')
+        self.OBJ_DESC = root.find("Description1f").text
         self.HEADER_GUARD = "NX_GENERATED_" + self.OBJ_NAME.upper() + "_ID_" + self.OBJ_ID + "_H_"
         self.OBJ_INST = root.find("MultipleInstances").text
         self.MULTI_INSTANCE = zephyr_mapper.obj_instance_is_multiple(self.OBJ_INST)

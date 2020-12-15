@@ -73,14 +73,19 @@ def generate_zephyr_source_obj(templates_dir, template_name, lwm2m_obj: Lwm2mObj
     return
 
 
-def generate_zephyr_lwm2m_kconfig():
-    # TODO.....
+def generate_zephyr_lwm2m_kconfig(templates_dir, template_name, lwm2m_obj: Lwm2mObject):
+    template_loader = FileSystemLoader(templates_dir)
+    template_env = Environment(loader=template_loader)
+    template = template_env.get_template(template_name)
+    output = template.render(GEN_DATE=GEN_DATE, LWM2M_OBJECTS=lwm2m_obj)
+    print(output)
     pass
 
 
 if __name__ == '__main__':
-    # generate_lwm2m_object(TEMPLATES_DIR, "lwm2m_object_template.txt", "./xml/3347.xml",
-    #                       LWM2M_OBJECTS_OUTPUT_PATH + "lwm2m_objects/")
+    generated_lwm2m_objects = []
     lwm2m_object = generate_lwm2m_object(TEMPLATES_DIR, "lwm2m_object_template.txt", "./xml/3347.xml")
+    generated_lwm2m_objects.append(lwm2m_object)
     generate_zephyr_source_obj(TEMPLATES_DIR, "lwm2m_obj_zephyr_source.txt", lwm2m_object)
+    generate_zephyr_lwm2m_kconfig(TEMPLATES_DIR, "zephyr_kconfig.txt", generated_lwm2m_objects)
     pass

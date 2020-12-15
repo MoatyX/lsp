@@ -70,7 +70,7 @@ LOG_MODULE_REGISTER(LOG_MODULE_NAME, LOG_LEVEL);
 //---------------------------
 
 /*other defines*/
-#define MAX_INSTANCE_COUNT				{% if LWM2M_OBJ.MULTI_INSTANCE %}3{% else %}1{% endif %}			//TODO: make this configurable with Kconfig
+#define MAX_INSTANCE_COUNT				{% if LWM2M_OBJ.MULTI_INSTANCE %}CONFIG_LWM2M_CPP_{{ LWM2M_OBJ.OBJ_NAME.upper() }}_MAX_INSTANCE_COUNT{% else %}1{% endif %}
 //---------------------------
 
 //object management
@@ -138,7 +138,7 @@ static struct lwm2m_engine_obj_inst* object_create_callback(uint16_t obj_inst_id
 static int {{ INIT_FN_NAME() }}(const struct device *dev) {
     lwm2m_obj.obj_id = {{ OBJ_DEF() }};
     lwm2m_obj.fields = fields;
-    lwm2m_obj.field_count = OBJ_RESOURCES_COUNT;            //TODO: make dynamic for supporting the TIME_STAMP resource as an extension for example?
+    lwm2m_obj.field_count = OBJ_RESOURCES_COUNT;            //TODO: make dynamic for supporting the non-standard TIME_STAMP resource as an extension for example?
     lwm2m_obj.max_instance_count = MAX_INSTANCE_COUNT;
     lwm2m_obj.create_cb = object_create_callback;
 

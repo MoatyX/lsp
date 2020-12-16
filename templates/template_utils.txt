@@ -1,0 +1,7 @@
+{%- macro OBJ_KCONFIG_DEFINE(OBJ_NAME) -%}
+LWM2M_CPP_{{ OBJ_NAME.upper() }}
+{%- endmacro -%}
+
+{%- macro ZEPHYR_SRC_FILE_NAME(OBJ_NAME, OBJ_ID) -%}
+{{ OBJ_NAME.lower() }}_id{{ OBJ_ID }}.c
+{%- endmacro -%}

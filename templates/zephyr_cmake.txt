@@ -1,0 +1,9 @@
+# AUTOMATICALLY GENERATED CODE
+# python LwM2M Objects Generator tool: https://github.com/MoatyX/lwm2m-objects-generator
+# Gen Date: {{ GEN_DATE }}
+
+{%- import "template_utils.txt" as UTILS %}
+
+{% for item in LWM2M_OBJECTS %}
+zephyr_library_sources_ifdef(CONFIG_{{ UTILS.OBJ_KCONFIG_DEFINE(item.OBJ_NAME) }} {{ UTILS.ZEPHYR_SRC_FILE_NAME(item.OBJ_NAME, item.OBJ_ID) }})
+{% endfor %}

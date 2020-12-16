@@ -39,4 +39,5 @@ class Lwm2mObject:
             res.parse()
             self.RESOURCES.append(res)
             pass
+        self.RES_COUNT = len(self.RESOURCES)
         pass

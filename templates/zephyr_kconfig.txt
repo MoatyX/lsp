@@ -2,22 +2,24 @@
 # python LwM2M Objects Generator tool: https://github.com/MoatyX/lwm2m-objects-generator
 # Gen Date: {{ GEN_DATE }}
 
+{%- import "template_utils.txt" as UTILS %}
+
 menuconfig LWM2M_CPP_SUPPORT
     bool "Enable LwM2M Objects C++ Classes Model"
     help
         This options enables the Auto-generated C++ Classes of all OMA LwM2M Objects
 
 {% for item in LWM2M_OBJECTS %}
-config LWM2M_CPP_{{ item.OBJ_NAME.upper() }}
+config {{ UTILS.OBJ_KCONFIG_DEFINE(item.OBJ_NAME) }}
     bool "Enable C++ Version of {{ item.OBJ_NAME.replace("_", " ") }}"
     default n
     help
         {{ item.OBJ_DESC }}
 
-config LWM2M_CPP_{{ item.OBJ_NAME.upper() }}_MAX_INSTANCE_COUNT
+config {{ UTILS.OBJ_KCONFIG_DEFINE(item.OBJ_NAME) }}_MAX_INSTANCE_COUNT
     int "Maximum number of instances to be created"
     default 1
-    depends on LWM2M_CPP_{{ item.OBJ_NAME.upper() }}
+    depends on {{ UTILS.OBJ_KCONFIG_DEFINE(item.OBJ_NAME) }}
     help
         This setting establishes the total count of object instances
         available to the LWM2M client.

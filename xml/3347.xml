@@ -3,9 +3,9 @@
        xsi:noNamespaceSchemaLocation="http://openmobilealliance.org/tech/profiles/LWM2M.xsd">
     <Object ObjectType="MODefinition">
         <Name>Push button</Name>
-        <Description1f>This IPSO object is used to report the state of a momentary action push button control and to
+        <Description1>This IPSO object is used to report the state of a momentary action push button control and to
             count the number of times the control has been operated since the last observation.
-        </Description1f>
+        </Description1>
         <ObjectID>3347</ObjectID>
         <ObjectURN>urn:oma:lwm2m:ext:3347</ObjectURN>
         <MultipleInstances>Multiple</MultipleInstances>

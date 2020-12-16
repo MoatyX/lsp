@@ -103,7 +103,7 @@ if __name__ == '__main__':
     generated_lwm2m_objects = []
 
     # TODO: some for loop here to loop over all XML files....
-    lwm2m_object = generate_lwm2m_object(TEMPLATES_DIR, "lwm2m_object_template.txt", "./xml/3347.xml",
+    lwm2m_object = generate_lwm2m_object(TEMPLATES_DIR, "lwm2m_object_template.txt", "./xml/3347.xml.xml",
                                          "./generated/include/generated_lwm2m_objects/")
     generated_lwm2m_objects.append(lwm2m_object)
     generate_zephyr_source_obj(TEMPLATES_DIR, "lwm2m_obj_zephyr_source.txt", lwm2m_object,

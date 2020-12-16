@@ -1,4 +1,4 @@
-{# A C++ Application-level header file #}
+{#- A C++ Application-level header file -#}
 
 {% macro RES_COUNT_MACRO() -%}
 ID{{ LWM2M_OBJ.OBJ_ID }}_RES_COUNT
@@ -26,7 +26,7 @@ namespace nx {
 
         public:
             {% for item in LWM2M_OBJ.RESOURCES -%}
-            {{ item.RES_DATA_TYPE.lower() }} {{ item.RES_NAME }};
+            {{ item.RES_CPP_DATA_TYPE }} {{ item.RES_NAME }};
             {% endfor %}
         };
 
@@ -37,8 +37,8 @@ namespace nx {
 
             //Lwm2mResource definitions
             {% for item in LWM2M_OBJ.RESOURCES -%}
-            RESOURCE({{ item.RES_ID }}, resource_type::{{ item.RES_INST_TYPE.upper() }}, resource_operations::{{ item.RES_OP.upper() }}, (member_pointer)(&instance::{{ item.RES_NAME }}),
-                    MEMBER_SIZE(instance::{{ item.RES_NAME }}), {{ item.RES_NAME }});
+            RESOURCE({{ item.RES_ID }}, resource_type::{{ item.RES_INST_TYPE.upper() }}, resource_operations::{{ item.RES_OP.upper() }},
+                    (member_pointer)(&instance::{{ item.RES_NAME }}), {{ item.RES_NAME }});
             {% endfor %}
 
         public:

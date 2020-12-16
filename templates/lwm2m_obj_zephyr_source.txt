@@ -15,27 +15,18 @@ register_{{ OBJ_NAME() }}_object
 {%- endmacro %}
 
 {%- macro FIELD_BUILDER(OBJ_ID_DEF, OP, ZEPHYR_DATA_TYPE, MANDATORY) -%}
-    {% set FINAL_FIELD="" -%}
-
     {# build either an EXECUTE or a DATA Object field #}
-    {%- if OP == "EXEC" -%}
-        {% set FINAL_FIELD = FINAL_FIELD + "OBJ_FIELD_EXECUTE" -%}
-        {% if MANDATORY == True -%}
-            {% set FINAL_FIELD = FINAL_FIELD + "_OPT" -%}
-        {% endif -%}
-    {% else -%}
-        {% set FINAL_FIELD = FINAL_FIELD + "OBJ_FIELD_DATA" -%}
-    {% endif -%}
-
-    {# build the correct Operation type #}
-    {% set FINAL_OP="" -%}
-    {% if OP != "EXEC" -%}
-        {% set FINAL_OP = FINAL_OP + OP -%}
-        {% if MANDATORY == False -%}
-            {% set FINAL_OP = FINAL_OP + "_OPT" -%}
-        {% endif -%}
-    {% endif -%}
-    {{ FINAL_FIELD }}({{ OBJ_ID_DEF }}, {{ FINAL_OP }}, {{ ZEPHYR_DATA_TYPE }})
+    {%- if OP == "E" %}
+        OBJ_FIELD_EXECUTE_OPT({{ OBJ_ID_DEF }})
+    {%- else %}
+        {%- set FINAL_FIELD = "OBJ_FIELD_DATA" %}
+        {#- build the correct Operation type #}
+        {%- set FINAL_OP = OP %}
+        {%-if MANDATORY == False %}
+            {%- set FINAL_OP = FINAL_OP + "_OPT" %}
+        {%- endif %}
+        {{ FINAL_FIELD }}({{ OBJ_ID_DEF }}, {{ FINAL_OP }}, {{ ZEPHYR_DATA_TYPE }})
+    {%- endif %}
 {%- endmacro %}
 
 {%- macro OBJ_DEF() -%}
@@ -119,8 +110,12 @@ static struct lwm2m_engine_obj_inst* object_create_callback(uint16_t obj_inst_id
 
     //after setting everything to NULL, now assign the IDs and bind res with res_inst for every res
     {%- for item in LWM2M_OBJ.RESOURCES -%}
-    {%- if item.RES_OP != "EXEC" %}
+    {%- if item.RES_OP != "E" %}
+    {%- if not item.IS_MULTIPLE %}
     INIT_OBJ_RES_OPTDATA({{ OBJ_ID_DEF(item.RES_NAME) }}, res[avail], i, res_inst[avail], j);
+    {%- else %}
+    INIT_OBJ_RES_MULTI_OPTDATA({{ OBJ_ID_DEF(item.RES_NAME) }}, res[avail], i, res_inst[avail], j, {{ item.RANGE }}, false);
+    {%- endif %}
     {%- else %}
     INIT_OBJ_RES_EXECUTE({{ OBJ_ID_DEF(item.RES_NAME) }}, res[avail], i, NULL);
     {%- endif %}

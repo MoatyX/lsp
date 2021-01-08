@@ -4,7 +4,7 @@ from lwm2m_resource import Lwm2mResource
 
 
 class Lwm2mObject:
-    xml: str
+    xml_path: str
     RESOURCES = []
     OBJ_ID: str
     OBJ_NAME: str
@@ -16,18 +16,18 @@ class Lwm2mObject:
     MULTI_INSTANCE = False
 
     def __init__(self, xml_path: str):
-        self.xml = xml_path
+        self.xml_path = xml_path
         pass
 
     def parse(self):
-        tree = ET.parse(self.xml)
+        tree = ET.parse(self.xml_path)
         if tree is None:
-            print(f"failed to parse {self.xml}")
+            print(f"failed to parse {self.xml_path}")
             return
 
         root = tree.getroot()[0]  # LWM2M(actual root) -> OBJECT(use this as the "root")
         self.OBJ_ID = root.find("ObjectID").text
-        self.OBJ_NAME = str(root.find("Name").text).replace(' ', '_')
+        self.OBJ_NAME = str(root.find("Name").text).replace(' ', '_').replace('-', '_').replace('/', '_')
         self.OBJ_DESC = root.find("Description1").text
         self.HEADER_GUARD = "NX_GENERATED_" + self.OBJ_NAME.upper() + "_ID_" + self.OBJ_ID + "_H_"
         self.OBJ_INST = root.find("MultipleInstances").text

@@ -1,6 +1,8 @@
 """functions that helps mapping standard-defined LwM2M Resource types, to a equivalent Programming language Data type"""
 
 # a dictionary that maps XML Resource Types to equivalent C++ (first part of the tuple) or Zephyr C type (2nd part)
+# https://www.openmobilealliance.org/release/LightweightM2M/V1_1-20180710-A/HTML-Version/OMA-TS-LightweightM2M_Core-V1_1-20180710-A.html
+# Appendix C. Data Types (Normative)
 res_types = {
     "Boolean": ("bool", "BOOL"),
     "Integer": ("int64_t", "S64"),
@@ -10,6 +12,7 @@ res_types = {
     "EXEC": ("executable", ""),
     "Objlnk": ("void*", "OBJLNK"),
     "Opaque": ("void*", "OPAQUE"),
+    "Corelnk": ("char*", "STRING"),
     "Unsigned Integer": ("uint64_t", "U64")
 }
 
@@ -27,14 +30,19 @@ def map_to_cpp_data_type(res_data_type: str, res_op: str, is_multiple: bool) -> 
         res_data_type = "EXEC"  # executable
         pass
 
-    out_tuple = res_types[res_data_type]
-    output = out_tuple[0]
-    if is_multiple:
-        corrected_output = f"multi_inst_resource<{output}>"
-        output = corrected_output
-        pass
+    try:
+        out_tuple = res_types[res_data_type]
+        output = out_tuple[0]
+        if is_multiple:
+            corrected_output = f"multi_inst_resource<{output}>"
+            output = corrected_output
+            pass
 
-    return output
+        return output
+    except:
+        raise Exception(f"{res_data_type} not supported")
+        pass
+    pass
 
 
 def map_to_zephyr_type_def(res_data_type: str) -> str:

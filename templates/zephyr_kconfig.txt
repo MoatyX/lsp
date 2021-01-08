@@ -13,6 +13,7 @@ menuconfig LWM2M_CPP_SUPPORT
 config {{ UTILS.OBJ_KCONFIG_DEFINE(item.OBJ_NAME) }}
     bool "Enable C++ Version of {{ item.OBJ_NAME.replace("_", " ") }}"
     default n
+    depends on LWM2M_CPP_SUPPORT
     help
         {{ item.OBJ_DESC }}
 

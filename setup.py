@@ -12,7 +12,7 @@ setuptools.setup(
     description="A tool that generates high level C++ representation of LwM2M Objects and C source that defines "
                 "these LwM2M objects in the Zephyr-RTOS environment, from OMA's XML Object Definitions",
     long_description=long_description,
-    long_description_content_type="test/markdown",
+    long_description_content_type="text/markdown",
     url="https://github.com/MoatyX/lsp.git",
     packages=setuptools.find_packages(),
     install_requires=[

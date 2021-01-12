@@ -152,4 +152,7 @@ fabric.properties
 
 #code specific
 generated/
+build/
+dist/
+lsp_moaty.egg-info/
 

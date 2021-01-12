@@ -1,6 +1,8 @@
 import xml.etree.ElementTree as ET
-import zephyr_mapping_utilities as zephyr_mapper
-from lwm2m_resource import Lwm2mResource
+
+import lsp.util
+from lsp import zephyr_mapping_utilities as zephyr_mapper
+from lsp.lwm2m_resource import Lwm2mResource
 
 
 class Lwm2mObject:
@@ -31,7 +33,7 @@ class Lwm2mObject:
         self.OBJ_DESC = root.find("Description1").text
         self.HEADER_GUARD = "NX_GENERATED_" + self.OBJ_NAME.upper() + "_ID_" + self.OBJ_ID + "_H_"
         self.OBJ_INST = root.find("MultipleInstances").text
-        self.MULTI_INSTANCE = zephyr_mapper.obj_is_multiple(self.OBJ_INST)
+        self.MULTI_INSTANCE = lsp.util.obj_is_multiple(self.OBJ_INST)
 
         resources_raw = root.find("Resources")
         for res_raw in resources_raw:

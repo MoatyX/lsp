@@ -73,20 +73,3 @@ def map_resource_instance_type(data_type: str, default_instance_definition: str)
     return default_instance_definition
 
 
-def obj_is_multiple(obj_multiple_instances: str) -> bool:
-    """
-    maps the xml value of an Object's "MultipleInstances" to a boolean, that represents if the object can be instanced.
-    this is useful to optimize memory usage of the generated code
-    :param obj_multiple_instances:
-    :return:
-    """
-    return True if obj_multiple_instances.upper() == "Multiple".upper() else False
-
-
-def obj_is_mandatory(xml_mandatory: str) -> bool:
-    """
-    maps the xml value "Mandatory" to a boolean
-    :param xml_mandatory:
-    :return:
-    """
-    return False if xml_mandatory.upper() == "Optional".upper() else True

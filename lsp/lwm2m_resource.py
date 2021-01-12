@@ -1,5 +1,7 @@
 import xml.etree.ElementTree as ET
-import zephyr_mapping_utilities as mapper
+
+import lsp.util
+from lsp import zephyr_mapping_utilities as mapper
 import re
 
 
@@ -41,7 +43,7 @@ class Lwm2mResource:
         if self.RES_OP is None: self.RES_OP = self.DEFAULT_RES_OP
         res_xml_is_multi = self.xml_res.find("MultipleInstances").text
 
-        self.IS_MULTIPLE = mapper.obj_is_multiple(res_xml_is_multi)
+        self.IS_MULTIPLE = lsp.util.obj_is_multiple(res_xml_is_multi)
         if self.IS_MULTIPLE:
             range_enum = self.xml_res.find("RangeEnumeration").text
             if range_enum: range_enum = range_enum.strip()
@@ -70,5 +72,5 @@ class Lwm2mResource:
 
         self.DESCRIPTION = self.xml_res.find("Description").text
         res_xml_mandatory = self.xml_res.find("Mandatory").text
-        self.MANDATORY = mapper.obj_is_mandatory(res_xml_mandatory)
+        self.MANDATORY = lsp.util.obj_is_mandatory(res_xml_mandatory)
         pass

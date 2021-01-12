@@ -133,14 +133,16 @@ def gen_code(xml_files, temp_dir, temp_highlvl, temp_lowlvl, output_highlvl, out
 
 def generate(temp_dir, temp_highlvl, temp_lowlvl, output_highlvl, output_lowlvl, lwm2m_registry, force_update,
               input_dir, threads):
-    ready = Path.exists(Path(input_dir)) and os.listdir(input_dir) != 0
-    if not ready:
-        print("input dir is empty or does not exist....exiting")
-        exit(-1)
-        pass
 
+    ready = False
     if force_update:
         ready = os.system(f'git clone {lwm2m_registry} {input_dir}') == 0
+        pass
+
+    ready = ready or Path.exists(Path(input_dir)) and os.listdir(input_dir) != 0
+    if not ready:
+        print("input dir is empty or does not exist, please re-run again using the --force-update option")
+        exit(-1)
         pass
 
     if not ready:

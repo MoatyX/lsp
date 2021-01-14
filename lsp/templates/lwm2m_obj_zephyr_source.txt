@@ -87,7 +87,7 @@ static struct lwm2m_engine_obj_inst* object_create_callback(uint16_t obj_inst_id
 	int avail = -1, i = 0, j = 0;
 
 	/* Check that there is no other instance with this ID */
-	for (int i = 0; i < MAX_INSTANCE_COUNT; i++) {
+	for (i = 0; i < MAX_INSTANCE_COUNT; i++) {
 		if (instances[i].obj && instances[i].obj_inst_id == obj_inst_id) {
 			LOG_ERR("Can not create instance - " "already existing: %u", obj_inst_id);
 			return NULL;

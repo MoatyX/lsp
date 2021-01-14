@@ -1,25 +1,22 @@
 import xml.etree.ElementTree as ET
 
 import lsp.util
-from lsp import zephyr_mapping_utilities as zephyr_mapper
 from lsp.lwm2m_resource import Lwm2mResource
 
 
 class Lwm2mObject:
-    xml_path: str
-    RESOURCES = []
-    OBJ_ID: str
-    OBJ_NAME: str
-    OBJ_INST: str
-    OBJ_DESC: str
-    HEADER_GUARD: str
-
-    RES_COUNT = 0
-    MULTI_INSTANCE = False
 
     def __init__(self, xml_path: str):
         self.xml_path = xml_path
-        pass
+        self.RESOURCES = []
+
+        self.MULTI_INSTANCE = None
+        self.RES_COUNT = None
+        self.HEADER_GUARD = None
+        self.OBJ_DESC = None
+        self.OBJ_INST = None
+        self.OBJ_NAME = None
+        self.OBJ_ID = None
 
     def parse(self):
         tree = ET.parse(self.xml_path)
@@ -29,7 +26,7 @@ class Lwm2mObject:
 
         root = tree.getroot()[0]  # LWM2M(actual root) -> OBJECT(use this as the "root")
         self.OBJ_ID = root.find("ObjectID").text
-        self.OBJ_NAME = str(root.find("Name").text).replace(' ', '_').replace('-', '_').replace('/', '_')
+        self.OBJ_NAME = str(root.find("Name").text).replace(' ', '_').replace('-', '_').replace('/', '_').replace('.', '_')
         self.OBJ_DESC = root.find("Description1").text
         self.HEADER_GUARD = "NX_GENERATED_" + self.OBJ_NAME.upper() + "_ID_" + self.OBJ_ID + "_H_"
         self.OBJ_INST = root.find("MultipleInstances").text

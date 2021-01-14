@@ -140,7 +140,7 @@ def generate(temp_dir, temp_highlvl, temp_lowlvl, output_highlvl, output_lowlvl,
     lwm2m_xml_files = glob.glob(f"{INPUT_DIR}/*.xml")
     lwm2m_xml_files = list(filter(lambda x: Path(x).name.partition(".")[0].isnumeric(),
                                   lwm2m_xml_files))  # filter out none lwm2m objects, which are files that are not like this: <some number>.xml
-    lwm2m_xml_files.sort()  # for some reason: this fixes a bug where some xml files will be merged into each other during parsing. no idea why, could be a jinja bug or bad config from me
+    lwm2m_xml_files.sort()  # sorting is awesome
     print(f"files to be parsed ({len(lwm2m_xml_files)} files): ", lwm2m_xml_files)
     if len(lwm2m_xml_files) < threads: threads = len(lwm2m_xml_files)   # to avoid creating unneeded threads
     if threads <= 1:
@@ -202,9 +202,9 @@ def generate_cli(temp_dir, temp_highlvl, temp_lowlvl, output_highlvl, output_low
 
 if __name__ == '__main__':
     # use Click
-    generate_cli()
+    # generate_cli()
 
     # enable this to run code normally without using Click
-    # generate(TEMPLATES_DIR, TEMP_ZEPHYR_HIGHLEVEL, TEMP_ZEPHYR_LOWLEVEL, OUTPUT_HIGHLVL_DIR, OUTPUT_LOWLVL_DIR,
-    #          LWM2M_OBJ_REGISTRY, FORCE_XML_UPDATE, INPUT_DIR, multiprocessing.cpu_count())
+    generate(TEMPLATES_DIR, TEMP_ZEPHYR_HIGHLEVEL, TEMP_ZEPHYR_LOWLEVEL, OUTPUT_HIGHLVL_DIR, OUTPUT_LOWLVL_DIR,
+             LWM2M_OBJ_REGISTRY, FORCE_XML_UPDATE, INPUT_DIR, multiprocessing.cpu_count())
     pass

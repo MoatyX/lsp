@@ -8,35 +8,29 @@ import re
 class Lwm2mResource:
     # constants
     DEFAULT_MULTIPLE_COUNT = 7  # special case for the resources that don't define max instance count. we will assume the resource can have max this count of instances
-    DEFAULT_RES_OP = "RW"       # some lwm2m objects leave the "Operations" tag empty for some reason
-
-    # essential resource data
-    RES_CPP_DATA_TYPE: str
-    RES_XML_DATA_TYPE: str
-    RES_NAME: str
-    RES_ID: str
-    RES_INST_TYPE: str
-    RES_OP: str
-    DESCRIPTION: str
-    MANDATORY: bool
-    IS_MULTIPLE: bool
-    RANGE_BEGIN: int
-    RANGE_END: int
-    RANGE: int
-
-    # Metadata, helps produce good code
-    RES_TYPE: str
-    ZEPHYR_RES_DATA_TYPE: str
-
-    xml_res: ET.Element
+    DEFAULT_RES_OP = "RW"  # some lwm2m objects leave the "Operations" tag empty for some reason
 
     def __init__(self, xml_res: ET.Element):
+        self.ZEPHYR_RES_DATA_TYPE = None
+        self.RES_TYPE = None
+        self.RANGE = None
+        self.RANGE_END = None
+        self.RANGE_BEGIN = None
+        self.MANDATORY = None
+        self.DESCRIPTION = None
+        self.RES_INST_TYPE = None
+        self.RES_CPP_DATA_TYPE = None
+        self.IS_MULTIPLE = None
+        self.RES_OP = None
+        self.RES_XML_DATA_TYPE = None
+        self.RES_NAME = None
+        self.RES_ID = None
         self.xml_res = xml_res
         pass
 
     def parse(self):
         self.RES_ID = self.xml_res.attrib["ID"]
-        self.RES_NAME = self.xml_res.find("Name").text.replace(' ', '_').replace('-', '_').replace('/', '_').lower()
+        self.RES_NAME = self.xml_res.find("Name").text.replace(' ', '_').replace('-', '_').replace('/', '_').replace('.', '_').lower()
         self.RES_XML_DATA_TYPE = self.xml_res.find("Type").text
         self.RES_OP = self.xml_res.find("Operations").text
 

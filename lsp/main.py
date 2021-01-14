@@ -20,12 +20,12 @@ GEN_DATE = date.today().strftime("%m/%Y")
 
 def get_template(templates_dir: str, template_name: str):
     template_loader = FileSystemLoader(templates_dir)
-    template_env = Environment(loader=template_loader)
+    template_env = Environment(loader=template_loader, auto_reload=False)
     template = template_env.get_template(template_name)
     return template
 
 
-def output_file(output: str, output_dir_path=None, output_file_name=None):
+def write_file(output: str, output_dir_path=None, output_file_name=None):
     """
     outputs a string either on console, if a target path is not provided, or to a file if its provided
     :param output: the data
@@ -43,7 +43,9 @@ def output_file(output: str, output_dir_path=None, output_file_name=None):
 
         file_path = path / output_file_name
         source = open(file_path, "w")
+        source.seek(0)
         source.writelines(output)
+        source.truncate()
         source.close()
         pass
     pass
@@ -60,7 +62,7 @@ def generate_hightlevel_lwm2m_object(templates_dir: str, template_name: str, xml
     output = template.render(GEN_DATE=GEN_DATE, LWM2M_OBJ=LWM2M_OBJ)
 
     file_name = f"{LWM2M_OBJ.OBJ_NAME.lower()}_id{LWM2M_OBJ.OBJ_ID}.h"
-    output_file(output, output_dir_path, file_name)
+    write_file(output, output_dir_path, file_name)
 
     print(f"generated high level representation of {xml_path}")
     return LWM2M_OBJ
@@ -72,7 +74,7 @@ def generate_lowlevel_lwm2m_source(templates_dir, template_name, lwm2m_obj: Lwm2
     output = template.render(GEN_DATE=GEN_DATE, LWM2M_OBJ=lwm2m_obj)
 
     file_name = f"{lwm2m_obj.OBJ_NAME.lower()}_id{lwm2m_obj.OBJ_ID}.c"
-    output_file(output, output_dir_path, file_name)
+    write_file(output, output_dir_path, file_name)
 
     print(f"generated low level representation of {lwm2m_obj.xml_path}")
     return
@@ -80,28 +82,9 @@ def generate_lowlevel_lwm2m_source(templates_dir, template_name, lwm2m_obj: Lwm2
 
 def generate_zephyr_lwm2m_config(templates_dir, template_name, lwm2m_obj: [], output_dir_path=None,
                                  file_name: str = None):
-    template_loader = FileSystemLoader(templates_dir)
-    template_env = Environment(loader=template_loader)
-    template = template_env.get_template(template_name)
+    template = get_template(templates_dir, template_name)
     output = template.render(GEN_DATE=GEN_DATE, LWM2M_OBJECTS=lwm2m_obj)
-
-    # check if we should output to file, or to console
-    if output_dir_path is None:
-        print(output)
-    else:
-        # make sure the directory exits
-        path = Path(output_dir_path).absolute()
-        if not Path.exists(path):
-            path.mkdir(parents=True, exist_ok=True)
-            pass
-
-        file = path / file_name
-        zephyr_config = open(file, "w")
-        zephyr_config.seek(0)
-        zephyr_config.writelines(output)
-        zephyr_config.truncate()
-        zephyr_config.close()
-        pass
+    write_file(output, output_dir_path, file_name)
     pass
 
 
@@ -132,8 +115,7 @@ def gen_code(xml_files, temp_dir, temp_highlvl, temp_lowlvl, output_highlvl, out
 
 
 def generate(temp_dir, temp_highlvl, temp_lowlvl, output_highlvl, output_lowlvl, lwm2m_registry, force_update,
-              input_dir, threads):
-
+             input_dir, threads):
     ready = False
     if force_update:
         ready = os.system(f'git clone {lwm2m_registry} {input_dir}') == 0
@@ -158,7 +140,9 @@ def generate(temp_dir, temp_highlvl, temp_lowlvl, output_highlvl, output_lowlvl,
     lwm2m_xml_files = glob.glob(f"{INPUT_DIR}/*.xml")
     lwm2m_xml_files = list(filter(lambda x: Path(x).name.partition(".")[0].isnumeric(),
                                   lwm2m_xml_files))  # filter out none lwm2m objects, which are files that are not like this: <some number>.xml
+    lwm2m_xml_files.sort()  # for some reason: this fixes a bug where some xml files will be merged into each other during parsing. no idea why, could be a jinja bug or bad config from me
     print(f"files to be parsed ({len(lwm2m_xml_files)} files): ", lwm2m_xml_files)
+    if len(lwm2m_xml_files) < threads: threads = len(lwm2m_xml_files)   # to avoid creating unneeded threads
     if threads <= 1:
         gen_code(lwm2m_xml_files, temp_dir, temp_highlvl, temp_lowlvl, output_highlvl, output_lowlvl)
         pass
@@ -167,7 +151,7 @@ def generate(temp_dir, temp_highlvl, temp_lowlvl, output_highlvl, output_lowlvl,
         processes = []
         for i in range(threads):
             p = multiprocessing.Process(target=gen_code, args=(
-            split_xml[i], temp_dir, temp_highlvl, temp_lowlvl, output_highlvl, output_lowlvl))
+                split_xml[i], temp_dir, temp_highlvl, temp_lowlvl, output_highlvl, output_lowlvl))
             p.start()
             processes.append(p)
             pass
@@ -210,10 +194,9 @@ def generate(temp_dir, temp_highlvl, temp_lowlvl, output_highlvl, output_lowlvl,
 @click.option("--threads", default=4,
               help="number of threads created to run the parsing in parallel. default = 1 which means no multiprocessing")
 def generate_cli(temp_dir, temp_highlvl, temp_lowlvl, output_highlvl, output_lowlvl, lwm2m_registry, force_update,
-             input_dir, threads):
-
+                 input_dir, threads):
     generate(temp_dir, temp_highlvl, temp_lowlvl, output_highlvl, output_lowlvl, lwm2m_registry, force_update,
-              input_dir, threads)
+             input_dir, threads)
     pass
 
 

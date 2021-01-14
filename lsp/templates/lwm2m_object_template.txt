@@ -6,7 +6,7 @@ ID{{ LWM2M_OBJ.OBJ_ID }}_RES_COUNT
 
 /**
 * AUTOMATICALLY GENERATED CODE
-* python LwM2M Objects Generator tool: https://github.com/MoatyX/lwm2m-objects-generator
+* python LwM2M Objects Generator tool: https://github.com/MoatyX/lsp
 * Gen Date: {{ GEN_DATE }}
 */
 

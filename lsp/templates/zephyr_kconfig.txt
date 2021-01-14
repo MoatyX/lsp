@@ -1,5 +1,5 @@
 # AUTOMATICALLY GENERATED CODE
-# python LwM2M Objects Generator tool: https://github.com/MoatyX/lwm2m-objects-generator
+# python LwM2M Objects Generator tool: https://github.com/MoatyX/lsp
 # Gen Date: {{ GEN_DATE }}
 
 {%- import "template_utils.txt" as UTILS %}
